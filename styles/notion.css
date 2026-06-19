@@ -231,6 +231,7 @@ table {
   margin: 10pt 0 16pt;
   page-break-inside: auto;
   width: 100%;
+  table-layout: fixed;
 }
 
 thead {
@@ -252,6 +253,8 @@ td {
   padding: 5pt 6pt;
   text-align: left;
   vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 th {
