@@ -10,9 +10,9 @@ Notion 페이지와 정적 HTML/CSS를 인쇄 품질 PDF로 변환하는 로컬 
 - 중간 HTML을 함께 저장해 렌더링 문제를 추적할 수 있습니다.
 - Notion GUI export CSS를 레퍼런스로 삼아 콜아웃, 목차, 다단, 표, 체크리스트, 코드 블록, 링크 스타일을 보정합니다.
 - 정적 HTML 파일과 HTML 문자열도 WeasyPrint PDF로 변환합니다.
-- macOS Apple Silicon에서 Homebrew + Python venv만 사용하도록 구성했습니다.
+- macOS(Homebrew + Python venv)와 Windows(GTK 런타임 + Python venv)에서 모두 동작합니다.
 
-## 빠른 시작
+## 빠른 시작 (macOS)
 
 ```bash
 brew install pango gdk-pixbuf libffi poppler
@@ -30,6 +30,41 @@ ntn login
 source .venv/bin/activate
 python notion_to_pdf.py "https://app.notion.com/p/..." output/notion-page.pdf --html-output output/notion-page.html
 ```
+
+## 빠른 시작 (Windows)
+
+Windows에서는 WeasyPrint가 GTK(Pango/Cairo) 런타임을 필요로 합니다. GTK를 먼저 설치한 뒤 venv를 만듭니다.
+
+1. **Python 64-bit 설치** — https://www.python.org/downloads/ (설치 시 "Add python.exe to PATH" 체크)
+2. **GTK 런타임 설치 (MSYS2 권장)**
+   - https://www.msys2.org/ 에서 MSYS2 설치
+   - MSYS2 터미널에서: `pacman -S mingw-w64-x86_64-pango`
+   - `C:\msys64\mingw64\bin` 을 시스템 환경변수 `PATH`에 추가
+3. **프로젝트 설치** — PowerShell을 새로 열고 프로젝트 루트에서:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\scripts\setup_windows.ps1
+```
+
+스크립트가 `.venv` 생성, 의존성 설치, WeasyPrint 동작 점검까지 자동으로 진행합니다. 수동으로 하려면:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python convert.py templates\sample.html output\sample.pdf
+```
+
+Notion 페이지를 변환할 때, Windows에서는 `ntn` CLI 대신 Notion API 토큰을 직접 쓰는 `--client api` 방식을 권장합니다. [Notion Integrations](https://www.notion.so/my-integrations)에서 토큰을 발급하고 대상 페이지를 integration에 연결한 뒤:
+
+```powershell
+$env:NOTION_TOKEN = "secret_xxx"
+python notion_to_pdf.py "https://www.notion.so/..." output\notion-page.pdf --client api --html-output output\notion-page.html
+```
+
+> 참고: `WeasyPrint ... cannot load library 'libgobject-2.0-0'` 같은 오류는 GTK PATH가 잡히지 않았다는 뜻입니다. 위 2단계를 마친 뒤 PowerShell을 새로 열어 다시 시도하세요. PATH 추가가 어려우면 `$env:WEASYPRINT_DLL_DIRECTORIES = "C:\msys64\mingw64\bin"` 환경변수로 DLL 위치를 지정할 수 있습니다.
 
 ## 보안 주의
 
@@ -122,6 +157,9 @@ python convert.py --html-string '<h1>안녕하세요</h1><p>정적 HTML 문자�
 ├── notion_to_html.py
 ├── notion_to_pdf.py
 ├── requirements.txt
+├── scripts/
+│   ├── build_macos_app.sh
+│   └── setup_windows.ps1
 ├── README.md
 ├── reference/
 │   ├── README.md
@@ -192,6 +230,8 @@ brew --prefix
 ```
 
 Apple Silicon Homebrew의 기본 경로는 보통 `/opt/homebrew`입니다. 터미널을 새로 열거나 셸 설정에 Homebrew PATH가 반영되어 있는지 확인하세요.
+
+Windows에서 `cannot load library 'libgobject-2.0-0'` 또는 `libpango` 관련 오류가 나면 GTK 런타임 PATH 문제입니다. MSYS2로 `pacman -S mingw-w64-x86_64-pango`를 설치하고 `C:\msys64\mingw64\bin`을 `PATH`에 추가한 뒤 PowerShell을 새로 여세요. 또는 `$env:WEASYPRINT_DLL_DIRECTORIES = "C:\msys64\mingw64\bin"`로 직접 지정할 수 있습니다.
 
 ### PDF 검증 도구가 없을 때
 
