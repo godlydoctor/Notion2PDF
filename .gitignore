@@ -12,6 +12,9 @@ tmp/
 templates/2026-ai*.html
 *.log
 
+# Local secrets (Notion API token saved by the Windows GUI app)
+.notion2pdf.json
+
 # macOS
 .DS_Store
 

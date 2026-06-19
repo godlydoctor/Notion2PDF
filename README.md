@@ -118,6 +118,29 @@ python notion_to_pdf.py "https://app.notion.com/p/..." output/notion-page.pdf
 python notion_to_pdf.py "https://app.notion.com/p/..." output/notion-page.pdf --html-output templates/notion-page.html
 ```
 
+## Windows 앱 (더블클릭)
+
+> Notion 앱의 "내보내기 → PDF" 버튼 자체에는 외부 스타일을 적용할 수 없습니다(노션이 서버에서 PDF를 생성하므로 끼어들 지점이 없음). 대신 아래 앱으로 **Notion 링크를 붙여넣으면 이 프로젝트 스타일이 적용된 PDF를 바로 저장**할 수 있습니다 — macOS 앱의 Windows 버전입니다.
+
+준비물: ① `scripts\setup_windows.ps1`로 설치 완료(GTK 런타임 포함), ② Notion API 토큰.
+
+1. **토큰 발급** — https://www.notion.so/my-integrations 에서 internal integration을 만들고 `secret_...` 토큰을 복사합니다.
+2. **페이지 연결** — 변환할 Notion 페이지에서 `···` → `연결(Connections)` → 만든 integration을 추가합니다. (이 단계를 빠뜨리면 401 오류가 납니다.)
+3. **실행** — `Notion2PDF.bat`을 더블클릭합니다.
+
+앱 창에서:
+
+- **Notion 링크**를 붙여넣고, 처음 한 번 **API 토큰**을 입력합니다(`토큰 기억하기`를 켜면 `.notion2pdf.json`에 로컬 저장되어 다음부터는 생략됩니다 — 이 파일은 gitignore 처리됨).
+- `중간 HTML도 함께 저장`을 켜면 PDF와 같은 폴더에 같은 이름의 `.html`이 함께 저장됩니다.
+- **PDF로 저장**을 누르면 페이지 제목을 기본 파일명으로 한 저장 위치 선택창이 뜨고, 변환이 끝나면 PDF를 바로 열 수 있습니다.
+
+명령줄에서 직접 같은 변환을 하려면:
+
+```powershell
+$env:NOTION_TOKEN = "secret_xxx"
+python notion_to_pdf.py "https://www.notion.so/..." output\notion-page.pdf --client api
+```
+
 ## macOS 앱
 
 Notion 링크를 PDF로 변환하는 얇은 macOS 앱 번들이 포함되어 있습니다.
@@ -156,6 +179,8 @@ python convert.py --html-string '<h1>안녕하세요</h1><p>정적 HTML 문자�
 │   └── Notion2PDF.app
 ├── notion_to_html.py
 ├── notion_to_pdf.py
+├── notion2pdf_gui.py      # Windows GUI 앱
+├── Notion2PDF.bat         # Windows 더블클릭 런처
 ├── requirements.txt
 ├── scripts/
 │   ├── build_macos_app.sh
